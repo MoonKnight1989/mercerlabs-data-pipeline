@@ -1,0 +1,262 @@
+[
+  {
+    "sales_channel_id": "sch-web",
+    "partner_name": "Direct (Website)",
+    "partner_type": "direct",
+    "connection_type": "web",
+    "commission_rate": 0,
+    "net_multiplier_adult": 1.0,
+    "net_multiplier_other": 1.0,
+    "notes": "Direct website sales — no commission"
+  },
+  {
+    "sales_channel_id": "sch-pos",
+    "partner_name": "Box Office (POS)",
+    "partner_type": "direct",
+    "connection_type": "pos",
+    "commission_rate": 0,
+    "net_multiplier_adult": 1.0,
+    "net_multiplier_other": 1.0,
+    "notes": "Point of sale / box office — no commission"
+  },
+  {
+    "sales_channel_id": "sch-internal-booking",
+    "partner_name": "Internal Booking",
+    "partner_type": "internal",
+    "connection_type": "native",
+    "commission_rate": 0,
+    "net_multiplier_adult": 1.0,
+    "net_multiplier_other": 1.0,
+    "notes": "Hotels, groups, comps — uses custom ticket types with pre-baked net prices"
+  },
+  {
+    "sales_channel_id": "sch-kiosk",
+    "partner_name": "Kiosk",
+    "partner_type": "direct",
+    "connection_type": "pos",
+    "commission_rate": 0,
+    "net_multiplier_adult": 1.0,
+    "net_multiplier_other": 1.0,
+    "notes": "Self-service kiosk — no commission"
+  },
+  {
+    "sales_channel_id": "sch_689b974b3c97b864f1cbac8c",
+    "partner_name": "Kiosk (Internal)",
+    "partner_type": "direct",
+    "connection_type": "pos",
+    "commission_rate": 0,
+    "net_multiplier_adult": 1.0,
+    "net_multiplier_other": 1.0,
+    "notes": "Internal kiosk booking channel"
+  },
+  {
+    "sales_channel_id": "sch_69ab02d015fa535f892c5951",
+    "partner_name": "Kiosk Custom Channel",
+    "partner_type": "direct",
+    "connection_type": "pos",
+    "commission_rate": 0,
+    "net_multiplier_adult": 1.0,
+    "net_multiplier_other": 1.0,
+    "notes": "Custom kiosk channel from Vivenu API"
+  },
+  {
+    "sales_channel_id": "sch_692dff79dff0d30e74ca571d",
+    "partner_name": "ANI",
+    "partner_type": "ota",
+    "connection_type": "native",
+    "commission_rate": 0.25,
+    "net_multiplier_adult": 0.80,
+    "net_multiplier_other": 0.80,
+    "notes": "25% stated commission. Adult %: 80%, Youth %: 80%"
+  },
+  {
+    "sales_channel_id": "sch_68640f34eb29e6f67cfd67d4",
+    "partner_name": "Get Your Guide",
+    "partner_type": "ota",
+    "connection_type": "native",
+    "commission_rate": 0.30,
+    "net_multiplier_adult": 0.74,
+    "net_multiplier_other": 0.75,
+    "notes": "30% stated commission. Adult %: 74%, Youth %: 75%"
+  },
+  {
+    "sales_channel_id": "sch_686410a134f4166a6a46d84b",
+    "partner_name": "Tiqets",
+    "partner_type": "ota",
+    "connection_type": "native",
+    "commission_rate": 0.30,
+    "net_multiplier_adult": 0.74,
+    "net_multiplier_other": 0.75,
+    "notes": "30% stated commission. Adult %: 74%, Youth %: 75%"
+  },
+  {
+    "sales_channel_id": "sch_6888ea86c0349dd36728dffb",
+    "partner_name": "Musement",
+    "partner_type": "ota",
+    "connection_type": "native",
+    "commission_rate": 0.25,
+    "net_multiplier_adult": 0.80,
+    "net_multiplier_other": 0.80,
+    "notes": "25% stated commission. Adult %: 80%, Youth %: 80%"
+  },
+  {
+    "sales_channel_id": "sch_685efca2ff8a3f539b6f7230",
+    "partner_name": "Expedia",
+    "partner_type": "ota",
+    "connection_type": "travel_curious",
+    "commission_rate": 0.30,
+    "net_multiplier_adult": 0.74,
+    "net_multiplier_other": 0.75,
+    "notes": "30% stated commission via Redeam. Adult %: 74%, Youth %: 75%"
+  },
+  {
+    "sales_channel_id": "sch_6883b519eb54c3c058a073c2",
+    "partner_name": "Viator",
+    "partner_type": "ota",
+    "connection_type": "travel_curious",
+    "commission_rate": 0.30,
+    "net_multiplier_adult": 0.74,
+    "net_multiplier_other": 0.75,
+    "notes": "30% stated commission via Redeam. Adult %: 74%, Youth %: 75%"
+  },
+  {
+    "sales_channel_id": "sch_68c06dd445ae2b30cc55c145",
+    "partner_name": "Groupon",
+    "partner_type": "ota",
+    "connection_type": "travel_curious",
+    "commission_rate": 0.33,
+    "net_multiplier_adult": 0.56,
+    "net_multiplier_other": 0.56,
+    "notes": "33% stated commission via Redeam. Adult %: 56%, Youth %: 56%"
+  },
+  {
+    "sales_channel_id": "sch_68f7c294291d810f638b32c8",
+    "partner_name": "Klook",
+    "partner_type": "ota",
+    "connection_type": "travel_curious",
+    "commission_rate": 0.30,
+    "net_multiplier_adult": 0.74,
+    "net_multiplier_other": 0.75,
+    "notes": "30% stated commission via Redeam. Adult %: 74%, Youth %: 75%"
+  },
+  {
+    "sales_channel_id": "sch_68f7c2a92779d568939ef3e0",
+    "partner_name": "FunExpress",
+    "partner_type": "ota",
+    "connection_type": "travel_curious",
+    "commission_rate": 0.30,
+    "net_multiplier_adult": 0.74,
+    "net_multiplier_other": 0.75,
+    "notes": "30% stated commission via Redeam. Adult %: 74%, Youth %: 75%"
+  },
+  {
+    "sales_channel_id": "sch_689f8977deff98895dddbf41",
+    "partner_name": "Tripster",
+    "partner_type": "ota",
+    "connection_type": "travel_curious",
+    "commission_rate": 0.25,
+    "net_multiplier_adult": 0.80,
+    "net_multiplier_other": 0.80,
+    "notes": "25% stated commission via Redeam. Adult %: 80%, Youth %: 80%"
+  },
+  {
+    "sales_channel_id": "sch_688a2ad81d0d75fc49e981a1",
+    "partner_name": "Civitatis",
+    "partner_type": "ota",
+    "connection_type": "travel_curious",
+    "commission_rate": 0.25,
+    "net_multiplier_adult": 0.80,
+    "net_multiplier_other": 0.80,
+    "notes": "25% stated commission via Redeam. Adult %: 80%, Youth %: 80%"
+  },
+  {
+    "sales_channel_id": "sch_6994cd597c953c1873fc36ea",
+    "partner_name": "Vacaystore",
+    "partner_type": "ota",
+    "connection_type": "travel_curious",
+    "commission_rate": 0,
+    "net_multiplier_adult": 1.0,
+    "net_multiplier_other": 1.0,
+    "notes": "Not connected yet — commission TBD"
+  },
+  {
+    "sales_channel_id": "sch_68f7c2ccc767762fc0b857f0",
+    "partner_name": "Virgin Experience Days",
+    "partner_type": "ota",
+    "connection_type": "travel_curious",
+    "commission_rate": 0.30,
+    "net_multiplier_adult": 0.73,
+    "net_multiplier_other": 0.74,
+    "notes": "30% stated commission. Adult %: 73%, Youth %: 74%. VIP + voucher ticket types"
+  },
+  {
+    "sales_channel_id": "sch_689cead7b9fb052b814af599",
+    "partner_name": "Entertainment Benefits Group",
+    "partner_type": "ota",
+    "connection_type": "travel_curious",
+    "commission_rate": 0.30,
+    "net_multiplier_adult": 0.74,
+    "net_multiplier_other": 0.75,
+    "notes": "30% stated commission via Redeam. Adult %: 74%, Youth %: 75%"
+  },
+  {
+    "sales_channel_id": "sch_68f7c28347cf75932b2f2f6e",
+    "partner_name": "Headout",
+    "partner_type": "ota",
+    "connection_type": "travel_curious",
+    "commission_rate": 0,
+    "net_multiplier_adult": 1.0,
+    "net_multiplier_other": 1.0,
+    "notes": "Commission TBD — no ticket activity yet"
+  },
+  {
+    "sales_channel_id": "sch_68f7c265e4a92be7ae2c6d5b",
+    "partner_name": "Hotelbeds",
+    "partner_type": "ota",
+    "connection_type": "travel_curious",
+    "commission_rate": 0,
+    "net_multiplier_adult": 1.0,
+    "net_multiplier_other": 1.0,
+    "notes": "Commission TBD — no ticket activity yet"
+  },
+  {
+    "sales_channel_id": "sch_6864108387be542b13f4881c",
+    "partner_name": "Logitix",
+    "partner_type": "ota",
+    "connection_type": "native",
+    "commission_rate": 0,
+    "net_multiplier_adult": 1.0,
+    "net_multiplier_other": 1.0,
+    "notes": "Commission TBD — no ticket activity yet"
+  },
+  {
+    "sales_channel_id": "sch_6864109358c71c1f65c88073",
+    "partner_name": "Event Dynamic",
+    "partner_type": "ota",
+    "connection_type": "native",
+    "commission_rate": 0,
+    "net_multiplier_adult": 1.0,
+    "net_multiplier_other": 1.0,
+    "notes": "Commission TBD — no ticket activity yet"
+  },
+  {
+    "sales_channel_id": "sch_68838dbd7760087f9b7bfe18",
+    "partner_name": "Musement (Legacy)",
+    "partner_type": "ota",
+    "connection_type": "travel_curious",
+    "commission_rate": 0.25,
+    "net_multiplier_adult": 0.80,
+    "net_multiplier_other": 0.80,
+    "notes": "Legacy Musement channel via Redeam — no recent activity"
+  },
+  {
+    "sales_channel_id": "sch_68838f1277d0ff4810c1e236",
+    "partner_name": "Musement 2",
+    "partner_type": "ota",
+    "connection_type": "travel_curious",
+    "commission_rate": 0.25,
+    "net_multiplier_adult": 0.80,
+    "net_multiplier_other": 0.80,
+    "notes": "Second Musement channel via Redeam — no recent activity"
+  }
+]

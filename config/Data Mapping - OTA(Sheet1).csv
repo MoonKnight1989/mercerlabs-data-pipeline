@@ -1,0 +1,21 @@
+,Connection Type,OTA Name,Notes,Channel Code & Filtering type,Special ticket name (if needed to be filtered by),Commission Rate,Adult Ticket Pricing,Youth/Senior/ Student Ticket Pricing,NET Adult,NET Youth/Senior/ Student Ticket Pricing,Adult Retail,Discounted Retail,Adult % ,Youth %
+,Native (vivenu),ANI,,sch_692dff79dff0d30e74ca571d,Adult & Youth (4-17) & Student & Senior (65+),25%, $42.46 , $37.56 , $39.00 , $34.50 ,$49 ,$43 ,80%,80%
+,Barcodes (vivenu),Big Bus Tours,,Secret Shop: Big Bus Bundle,,25%, $42.46 , $37.56 , $39.00 , $34.50 ,$49 ,$43 ,80%,80%
+,Barcodes (PrioTicket),Ceetiz,we send them tickets (sale date: date the tickets were created),no sale yet (secret shop until Prioticket is ready),Adult & Youth (4-17) & Student & Senior (65+),30%, $39.63 , $35.06 , $36.40 , $32.20 ,$49 ,$43 ,74%,75%
+Redeam,Travel Curious,Civitatis,,,Adult & Youth (4-17) & Student & Senior (65+),25%, $42.46 , $37.56 , $39.00 , $34.50 ,$49 ,$43 ,80%,80%
+Redeam,Barcodes (vivenu),Entertainment Benefits Group,,Secret Shop: EBG,,30%, $39.63 , $35.06 , $36.40 , $32.20 ,$49 ,$43 ,74%,75%
+Redeam,Travel Curious,Expedia,,sch_685efca2ff8a3f539b6f7230,Adult & Youth (4-17) & Student & Senior (65+),30%, $39.63 , $35.06 , $36.40 , $32.20 ,$49 ,$43 ,74%,75%
+Redeam,Travel Curious,FunExpress,,sch_68f7c2a92779d568939ef3e0,Adult & Youth (4-17) & Student & Senior (65+),30%, $39.63 , $35.06 , $36.40 , $32.20 ,$49 ,$43 ,74%,75%
+,Native (vivenu),GetYourGuide,,sch_68640f34eb29e6f67cfd67d4,Adult & Youth (4-17) & Student & Senior (65+),30%, $39.63 , $35.06 , $36.40 , $32.20 ,$49 ,$43 ,74%,75%
+,Portal (vivenu),Giftory,,Secret Shop: OTA - Giftory,Mercer Labs General Admission,30%, $39.63 , $35.06 , $36.40 , $32.20 ,$49 ,$43 ,74%,75%
+,Native (vivenu),Go City,Access list - Ticket type,Filter by Ticket Type, Go City,72%, $16.00 , $10.00 , $14.70 , $9.18 ,$49 ,$43 ,30%,21%
+Redeam,Travel Curious,Groupon,,sch_68c06dd445ae2b30cc55c145,Adult & Youth (4-17) & Student & Senior (65+),33%, $30.00 , $26.00 , $27.55 , $23.88 ,$49 ,$43 ,56%,56%
+Redeam,Travel Curious,Klook,,sch_68f7c294291d810f638b32c8,Adult & Youth (4-17) & Student & Senior (65+),30%, $39.63 , $35.06 , $36.40 , $32.20 ,$49 ,$43 ,74%,75%
+Redeam,Travel Curious,Klook Pass ,,"same link as above, but different ticket type",Pass (Adult pricing) & Youth/Senior/Student Pass,40%, $34.19 , $30.27 , $31.40 , $27.80 ,$49 ,$43 ,64%,65%
+,Native (vivenu),Musement,,sch_6888ea86c0349dd36728dffb,Adult & Youth (4-17) & Student & Senior (65+),25%, $42.46 , $37.56 , $39.00 , $34.50 ,$49 ,$43 ,80%,80%
+,Barcodes (vivenu),pulsd,,Secret Shop: pulsd,,30%, $27.30 ,, $25.07 , $-   ,$49 ,$43 ,51%,0%
+,Native (vivenu),Tiqets,,sch_686410a134f4166a6a46d84b,Adult & Youth (4-17) & Student & Senior (65+),30%, $39.63 , $35.06 , $36.40 , $32.20 ,$49 ,$43 ,74%,75%
+Redeam,Travel Curious,Tripster,,sch_689f8977deff98895dddbf41,Adult & Youth (4-17) & Student & Senior (65+),25%, $42.46 , $37.56 , $39.00 , $34.50 ,$49 ,$43 ,80%,80%
+,Travel Curious,Viator,,sch_6883b519eb54c3c058a073c2,Adult & Youth (4-17) & Student & Senior (65+),30%, $39.63 , $35.06 , $36.40 , $32.20 ,$49 ,$43 ,74%,75%
+,Need more info,Virgin Experience Gifts,,Secret Shop: OTA - Virgin Experience ,VIP Package  & Virgin Experience Voucher,30%, $55.64 , $39.63 , $51.10 , $36.40 ,$70 ,$49 ,73%,74%
+,not connected yet,Vacay Store,,,,,,,,,,,,

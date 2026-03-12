@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.js
+*.js.map
+*.d.ts
+!eslint.config.js
+
+.env
+.env.*
+
+.DS_Store
+*.log
