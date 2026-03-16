@@ -1,0 +1,22 @@
+{
+  "name": "pipeline-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "gcp-build": "npm run build",
+    "check": "tsc --noEmit",
+    "deploy": "gcloud functions deploy pipelineMonitor --gen2 --runtime=nodejs20 --trigger-http --source=. --entry-point=pipelineMonitor --region=us-east1 --project=mercer-labs-488707 --memory=256Mi --timeout=60s --no-allow-unauthenticated"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^3.4.0",
+    "@google-cloud/logging": "^11.0.0",
+    "@google-cloud/secret-manager": "^5.6.0",
+    "googleapis": "^144.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.6.0"
+  }
+}
