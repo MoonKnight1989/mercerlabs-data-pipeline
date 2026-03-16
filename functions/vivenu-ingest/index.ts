@@ -2,8 +2,8 @@ import * as ff from '@google-cloud/functions-framework';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import { randomUUID } from 'crypto';
 import type { IngestionResult } from './types';
-import { fetchTickets, fetchTransactions, fetchRecentScans } from './vivenu-client';
-import { mergeTickets, mergeTransactions, mergeScans } from './bigquery-writer';
+import { fetchTickets, fetchTransactions, fetchRecentScans, fetchEventById } from './vivenu-client';
+import { mergeTickets, mergeTransactions, mergeScans, findNewRootEvents, insertNewEvents } from './bigquery-writer';
 import { checkForUnknownChannels } from './channel-checker';
 
 const GCP_PROJECT = 'mercer-labs-488707';
@@ -60,6 +60,23 @@ async function runCatchup(): Promise<IngestionResult> {
     mergeScans(scans, batchId),
   ]);
 
+  // Auto-sync: detect new root events and register in reference.events
+  let newEventsCount = 0;
+  try {
+    const missingEventIds = await findNewRootEvents();
+    if (missingEventIds.length > 0) {
+      console.log(`[vivenu-ingest] Found ${missingEventIds.length} new root event(s): ${missingEventIds.join(', ')}`);
+      const newEvents = await Promise.all(
+        missingEventIds.map((id) => fetchEventById(apiKey, id))
+      );
+      newEventsCount = await insertNewEvents(newEvents);
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[vivenu-ingest] Event sync failed (non-fatal): ${msg}`);
+    errors.push(`Event sync failed: ${msg}`);
+  }
+
   // Check for unknown sales channels
   const newUnknownChannels = await checkForUnknownChannels();
   if (newUnknownChannels.length > 0) {
@@ -80,7 +97,7 @@ async function runCatchup(): Promise<IngestionResult> {
     scans_fetched: scans.length,
     scans_inserted: scanResult.inserted,
     scans_updated: scanResult.updated,
-    ticket_types_upserted: 0,
+    ticket_types_upserted: newEventsCount,
     new_unknown_channels: newUnknownChannels,
     errors,
     duration_ms: Date.now() - startTime,

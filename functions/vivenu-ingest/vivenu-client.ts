@@ -147,6 +147,15 @@ export async function fetchEvents(apiKey: string): Promise<VivenuEvent[]> {
 }
 
 /**
+ * Fetch a single event by ID from the Vivenu API.
+ */
+export async function fetchEventById(apiKey: string, eventId: string): Promise<VivenuEvent> {
+  const headers = { Authorization: `Bearer ${apiKey}` };
+  const response = await fetchWithRetry(`${EVENTS_BASE_URL}/${eventId}`, headers);
+  return (await response.json()) as VivenuEvent;
+}
+
+/**
  * Fetch recent scans from Portier API (newest first).
  * The Portier API has no date filter, so we fetch pages from the front
  * and stop after `maxPages` pages. Default 10 pages = 10,000 scans

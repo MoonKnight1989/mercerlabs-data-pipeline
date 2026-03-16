@@ -136,7 +136,10 @@ USING (
     CASE
       WHEN tx.payment_status IN ('REFUND', 'POS-CANCELED')
         THEN DATE(TIMESTAMP(tx.updated_at), 'America/New_York')
-    END AS refund_date
+    END AS refund_date,
+
+    -- Event name from reference.events (show/experience name)
+    ev.event_name
 
   FROM (
     SELECT * FROM (
@@ -162,6 +165,10 @@ USING (
   LEFT JOIN reference.partners p
     ON t.sales_channel_id = p.sales_channel_id
     AND p.is_active = TRUE
+
+  -- Join events for root event name (show/experience name)
+  LEFT JOIN reference.events ev
+    ON t.root_event_id = ev.event_id
 
   -- Join scans: pre-aggregate to first checkin per ticket
   LEFT JOIN (
@@ -190,6 +197,7 @@ WHEN MATCHED THEN
     customer_email_hash = source.customer_email_hash,
     event_id = source.event_id,
     root_event_id = source.root_event_id,
+    event_name = source.event_name,
     ticket_type_id = source.ticket_type_id,
     ticket_name = source.ticket_name,
     ticket_category = source.ticket_category,

@@ -3,6 +3,7 @@ import type {
   VivenuTicket,
   VivenuTransaction,
   VivenuScan,
+  VivenuEvent,
   RawTicketRow,
   RawTransactionRow,
   RawScanRow,
@@ -231,5 +232,52 @@ export async function mergeScans(
   const bq = new BigQuery({ projectId: PROJECT_ID });
   const rows = scans.map((s) => mapScanToRow(s, batchId));
   return mergeViaTempTable(bq, 'raw_scans', 'scan_id', rows, batchId);
+}
+
+// ============================================================
+// Event auto-sync: detect new root events and register them
+// ============================================================
+
+/**
+ * Find root_event_ids in raw_tickets that are missing from reference.events.
+ * Returns the list of event IDs that need to be fetched from the Vivenu API.
+ */
+export async function findNewRootEvents(): Promise<string[]> {
+  const bq = new BigQuery({ projectId: PROJECT_ID });
+  const [rows] = await bq.query({
+    query: `
+      SELECT DISTINCT t.root_event_id
+      FROM raw_vivenu.raw_tickets t
+      LEFT JOIN reference.events e ON t.root_event_id = e.event_id
+      WHERE t.root_event_id IS NOT NULL
+        AND e.event_id IS NULL
+    `,
+  });
+  return (rows as Array<{ root_event_id: string }>).map((r) => r.root_event_id);
+}
+
+/**
+ * Insert newly discovered root events into reference.events.
+ * Called with events fetched from the Vivenu API by ID.
+ */
+export async function insertNewEvents(events: VivenuEvent[]): Promise<number> {
+  if (events.length === 0) return 0;
+
+  const bq = new BigQuery({ projectId: PROJECT_ID });
+  const table = bq.dataset('reference').table('events');
+
+  const rows = events.map((ev) => ({
+    event_id: ev._id,
+    event_name: ev.name,
+    event_start: ev.start ?? null,
+    event_end: ev.end ?? null,
+    daily_capacity: null,
+    is_active: true,
+    notes: null,
+  }));
+
+  await table.insert(rows, { createInsertId: false });
+  console.log(`[bigquery-writer] Inserted ${rows.length} new root event(s) into reference.events`);
+  return rows.length;
 }
 
