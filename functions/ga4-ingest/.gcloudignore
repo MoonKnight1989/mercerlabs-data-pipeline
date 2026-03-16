@@ -1,0 +1,5 @@
+node_modules/
+*.test.ts
+.vscode/
+.DS_Store
+eslint.config.js

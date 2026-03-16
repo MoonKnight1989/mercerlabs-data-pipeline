@@ -1,0 +1,27 @@
+{
+  "name": "mercerdatapipeline",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MoonKnight1989/mercerlabs-data-pipeline.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MoonKnight1989/mercerlabs-data-pipeline/issues"
+  },
+  "homepage": "https://github.com/MoonKnight1989/mercerlabs-data-pipeline#readme",
+  "devDependencies": {
+    "@google-cloud/bigquery": "^8.1.1",
+    "@google-cloud/secret-manager": "^6.1.1",
+    "@types/node": "^25.5.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

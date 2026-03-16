@@ -2,8 +2,10 @@ import { BigQuery } from '@google-cloud/bigquery';
 import type {
   VivenuTicket,
   VivenuTransaction,
+  VivenuScan,
   RawTicketRow,
   RawTransactionRow,
+  RawScanRow,
 } from './types';
 
 const PROJECT_ID = 'mercer-labs-488707';
@@ -195,5 +197,39 @@ export async function mergeTransactions(
   const bq = new BigQuery({ projectId: PROJECT_ID });
   const rows = transactions.map((tx) => mapTransactionToRow(tx, batchId));
   return mergeViaTempTable(bq, 'raw_transactions', 'transaction_id', rows, batchId);
+}
+
+// ============================================================
+// Scan mapping
+// ============================================================
+
+function mapScanToRow(scan: VivenuScan, batchId: string): RawScanRow {
+  return {
+    scan_id: scan._id,
+    ticket_id: scan.ticketId,
+    scan_time: scan.time,
+    event_id: scan.eventId,
+    barcode: scan.barcode,
+    customer_name: scan.name,
+    ticket_type_id: scan.ticketTypeId,
+    ticket_name: scan.ticketName,
+    device_id: scan.deviceId ?? null,
+    scan_type: scan.type,
+    scan_result: scan.scanResult,
+    seller_id: scan.sellerId,
+    created_at: scan.createdAt,
+    updated_at: scan.updatedAt,
+    ingested_at: new Date().toISOString(),
+    ingestion_batch_id: batchId,
+  };
+}
+
+export async function mergeScans(
+  scans: VivenuScan[],
+  batchId: string
+): Promise<MergeResult> {
+  const bq = new BigQuery({ projectId: PROJECT_ID });
+  const rows = scans.map((s) => mapScanToRow(s, batchId));
+  return mergeViaTempTable(bq, 'raw_scans', 'scan_id', rows, batchId);
 }
 

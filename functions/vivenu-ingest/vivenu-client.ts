@@ -5,11 +5,14 @@ import type {
   VivenuTransactionsResponse,
   VivenuEvent,
   VivenuEventsResponse,
+  VivenuScan,
+  VivenuScansResponse,
 } from './types';
 
 const TICKETS_BASE_URL = 'https://vivenu.com/api/tickets';
 const TRANSACTIONS_BASE_URL = 'https://vivenu.com/api/transactions';
 const EVENTS_BASE_URL = 'https://vivenu.com/api/events';
+const SCANS_BASE_URL = 'https://portier.vivenu.com/api/scans';
 const PAGE_SIZE = 500;
 const MAX_RETRIES = 3;
 const INITIAL_BACKOFF_MS = 1000;
@@ -141,4 +144,42 @@ export async function fetchEvents(apiKey: string): Promise<VivenuEvent[]> {
 
   console.log(`[vivenu-client] Complete: ${allEvents.length} events fetched`);
   return allEvents;
+}
+
+/**
+ * Fetch recent scans from Portier API (newest first).
+ * The Portier API has no date filter, so we fetch pages from the front
+ * and stop after `maxPages` pages. Default 10 pages = 10,000 scans
+ * which covers ~2-3 days of typical volume.
+ * The MERGE in BigQuery handles deduplication.
+ */
+export async function fetchRecentScans(
+  apiKey: string,
+  maxPages = 10
+): Promise<VivenuScan[]> {
+  const allScans: VivenuScan[] = [];
+  const headers = { Authorization: `Bearer ${apiKey}` };
+  const scanPageSize = 1000;
+
+  console.log(`[vivenu-client] Fetching recent scans (up to ${maxPages} pages)`);
+
+  for (let page = 0; page < maxPages; page++) {
+    const skip = page * scanPageSize;
+    const params = new URLSearchParams({
+      top: String(scanPageSize),
+      skip: String(skip),
+    });
+
+    const response = await fetchWithRetry(`${SCANS_BASE_URL}?${params.toString()}`, headers);
+    const data = (await response.json()) as VivenuScansResponse;
+
+    allScans.push(...data.docs);
+
+    if (data.docs.length < scanPageSize) break;
+
+    console.log(`[vivenu-client] Scans: ${allScans.length}/${data.total}`);
+  }
+
+  console.log(`[vivenu-client] Complete: ${allScans.length} scans fetched`);
+  return allScans;
 }

@@ -138,11 +138,20 @@ USING (
         THEN DATE(TIMESTAMP(tx.updated_at), 'America/New_York')
     END AS refund_date
 
-  FROM raw_vivenu.raw_tickets t
+  FROM (
+    SELECT * FROM (
+      SELECT *, ROW_NUMBER() OVER (PARTITION BY ticket_id ORDER BY ingested_at DESC) AS _rn
+      FROM raw_vivenu.raw_tickets
+    ) WHERE _rn = 1
+  ) t
 
-  -- Join transactions for payment/fee data
-  LEFT JOIN raw_vivenu.raw_transactions tx
-    ON t.transaction_id = tx.transaction_id
+  -- Join transactions for payment/fee data (deduplicate: take latest row per transaction_id)
+  LEFT JOIN (
+    SELECT * FROM (
+      SELECT *, ROW_NUMBER() OVER (PARTITION BY transaction_id ORDER BY updated_at DESC) AS _rn
+      FROM raw_vivenu.raw_transactions
+    ) WHERE _rn = 1
+  ) tx ON t.transaction_id = tx.transaction_id
 
   -- Join ticket types for base (retail) price
   LEFT JOIN reference.ticket_types tt

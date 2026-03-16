@@ -2,8 +2,8 @@ import * as ff from '@google-cloud/functions-framework';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import { randomUUID } from 'crypto';
 import type { IngestionResult } from './types';
-import { fetchTickets, fetchTransactions } from './vivenu-client';
-import { mergeTickets, mergeTransactions } from './bigquery-writer';
+import { fetchTickets, fetchTransactions, fetchRecentScans } from './vivenu-client';
+import { mergeTickets, mergeTransactions, mergeScans } from './bigquery-writer';
 import { checkForUnknownChannels } from './channel-checker';
 
 const GCP_PROJECT = 'mercer-labs-488707';
@@ -39,22 +39,25 @@ async function runCatchup(): Promise<IngestionResult> {
   const apiKey = await getSecret('vivenu-api-key');
   const fetchOpts = { apiKey, startDate, endDate };
 
-  // Fetch tickets and transactions only.
-  // Scans: handled by scan.created webhook (Portier API has no date filter)
+  // Fetch tickets, transactions, and recent scans.
+  // Scans: Portier API has no date filter, so we fetch the most recent pages
+  // (10 pages = 10K scans ≈ 2-3 days) and MERGE handles dedup.
   // Ticket types: already seeded, maintained via event webhooks
-  const [tickets, transactions] = await Promise.all([
+  const [tickets, transactions, scans] = await Promise.all([
     fetchTickets(fetchOpts),
     fetchTransactions(fetchOpts),
+    fetchRecentScans(apiKey),
   ]);
 
   console.log(
-    `[vivenu-ingest] Fetched ${tickets.length} tickets, ${transactions.length} transactions`
+    `[vivenu-ingest] Fetched ${tickets.length} tickets, ${transactions.length} transactions, ${scans.length} scans`
   );
 
   // MERGE raw data in parallel
-  const [ticketResult, txResult] = await Promise.all([
+  const [ticketResult, txResult, scanResult] = await Promise.all([
     mergeTickets(tickets, batchId),
     mergeTransactions(transactions, batchId),
+    mergeScans(scans, batchId),
   ]);
 
   // Check for unknown sales channels
@@ -74,9 +77,9 @@ async function runCatchup(): Promise<IngestionResult> {
     transactions_fetched: transactions.length,
     transactions_inserted: txResult.inserted,
     transactions_updated: txResult.updated,
-    scans_fetched: 0,
-    scans_inserted: 0,
-    scans_updated: 0,
+    scans_fetched: scans.length,
+    scans_inserted: scanResult.inserted,
+    scans_updated: scanResult.updated,
     ticket_types_upserted: 0,
     new_unknown_channels: newUnknownChannels,
     errors,
@@ -86,6 +89,7 @@ async function runCatchup(): Promise<IngestionResult> {
   console.log(
     `[vivenu-ingest] Complete: tickets(+${result.tickets_inserted}/~${result.tickets_updated}), ` +
       `transactions(+${result.transactions_inserted}/~${result.transactions_updated}), ` +
+      `scans(+${result.scans_inserted}/~${result.scans_updated}), ` +
       `${result.new_unknown_channels.length} new channels, ${result.duration_ms}ms`
   );
 
