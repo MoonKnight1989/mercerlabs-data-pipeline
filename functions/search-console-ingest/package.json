@@ -9,7 +9,7 @@
     "check": "tsc --noEmit && eslint . && vitest run",
     "test": "vitest run",
     "test:watch": "vitest",
-    "deploy": "gcloud functions deploy searchConsoleIngest --gen2 --runtime=nodejs20 --trigger-http --source=. --entry-point=searchConsoleIngest --region=us-east1 --project=mercer-labs-488707 --memory=512Mi --timeout=540s --no-allow-unauthenticated"
+    "deploy": "gcloud functions deploy searchConsoleIngest --gen2 --runtime=nodejs22 --trigger-http --source=. --entry-point=searchConsoleIngest --region=us-east1 --project=mercer-labs-488707 --memory=512Mi --timeout=540s --no-allow-unauthenticated"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^7.9.0",

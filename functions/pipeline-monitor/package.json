@@ -7,7 +7,7 @@
     "build": "tsc",
     "gcp-build": "npm run build",
     "check": "tsc --noEmit",
-    "deploy": "gcloud functions deploy pipelineMonitor --gen2 --runtime=nodejs20 --trigger-http --source=. --entry-point=pipelineMonitor --region=us-east1 --project=mercer-labs-488707 --memory=256Mi --timeout=60s --no-allow-unauthenticated"
+    "deploy": "gcloud functions deploy pipelineMonitor --gen2 --runtime=nodejs22 --trigger-http --source=. --entry-point=pipelineMonitor --region=us-east1 --project=mercer-labs-488707 --memory=256Mi --timeout=60s --no-allow-unauthenticated"
   },
   "dependencies": {
     "@google-cloud/functions-framework": "^3.4.0",

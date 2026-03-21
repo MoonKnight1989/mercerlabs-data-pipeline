@@ -9,7 +9,7 @@
     "check": "tsc --noEmit && eslint . && vitest run",
     "test": "vitest run",
     "test:watch": "vitest",
-    "deploy": "gcloud functions deploy ga4Ingest --gen2 --runtime=nodejs20 --trigger-http --source=. --entry-point=ga4Ingest --region=us-east1 --project=mercer-labs-488707 --memory=1Gi --timeout=540s --no-allow-unauthenticated"
+    "deploy": "gcloud functions deploy ga4Ingest --gen2 --runtime=nodejs22 --trigger-http --source=. --entry-point=ga4Ingest --region=us-east1 --project=mercer-labs-488707 --memory=1Gi --timeout=540s --no-allow-unauthenticated"
   },
   "dependencies": {
     "@google-analytics/data": "^4.8.0",

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "gcp-build": "npm run build",
-    "deploy": "gcloud functions deploy vivenuWebhook --gen2 --runtime=nodejs20 --trigger-http --allow-unauthenticated --source=. --entry-point=vivenuWebhook --region=us-east1 --project=mercer-labs-488707 --memory=256Mi --timeout=30s"
+    "deploy": "gcloud functions deploy vivenuWebhook --gen2 --runtime=nodejs22 --trigger-http --allow-unauthenticated --source=. --entry-point=vivenuWebhook --region=us-east1 --project=mercer-labs-488707 --memory=256Mi --timeout=30s"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^7.9.0",
