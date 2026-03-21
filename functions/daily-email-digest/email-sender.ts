@@ -1,50 +1,54 @@
-import sgMail from '@sendgrid/mail';
+import { google } from 'googleapis';
 
-interface EmailOptions {
-  sendgridApiKey: string;
+interface SendEmailOptions {
+  serviceAccountKeyJson: string;
+  fromEmail: string;
   to: string[];
-  reportDate: string;
-  dayOfWeek: string;
-  narrative: string;
-  dashboardUrl?: string;
+  subject: string;
+  html: string;
 }
 
-export async function sendDigestEmail(options: EmailOptions): Promise<void> {
-  const { sendgridApiKey, to, reportDate, dayOfWeek, narrative, dashboardUrl } = options;
+/**
+ * Send an email via Gmail API using domain-wide delegation.
+ * The service account impersonates fromEmail (a real Workspace user)
+ * to send through Gmail.
+ */
+export async function sendEmail(options: SendEmailOptions): Promise<void> {
+  const { serviceAccountKeyJson, fromEmail, to, subject, html } = options;
+  const credentials = JSON.parse(serviceAccountKeyJson);
 
-  sgMail.setApiKey(sendgridApiKey);
+  const auth = new google.auth.JWT({
+    email: credentials.client_email,
+    key: credentials.private_key,
+    scopes: ['https://www.googleapis.com/auth/gmail.send'],
+    subject: fromEmail, // impersonate the sending address
+  });
 
-  const dashboardLink = dashboardUrl
-    ? `<a href="${dashboardUrl}">Open full dashboard</a><br>`
-    : '';
+  const gmail = google.gmail({ version: 'v1', auth });
 
-  const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <h2 style="margin-bottom: 4px;">Mercer Labs Daily Briefing</h2>
-      <p style="color: #666; margin-top: 0;">${reportDate} — ${dayOfWeek}</p>
-      <hr style="border: 1px solid #eee;">
-      <div style="line-height: 1.6;">
-        ${narrative}
-      </div>
-      <hr style="border: 1px solid #eee;">
-      <p style="color: #999; font-size: 12px;">
-        ${dashboardLink}
-        Auto-generated from Mercer Labs Analytics Pipeline. Data as of 06:30 ET.
-      </p>
-    </div>
-  `;
+  // Build RFC 2822 MIME message
+  const boundary = `boundary_${Date.now()}`;
+  const mime = [
+    `From: Mercer Labs Analytics <${fromEmail}>`,
+    `To: ${to.join(', ')}`,
+    `Subject: ${subject}`,
+    `MIME-Version: 1.0`,
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    ``,
+    `--${boundary}`,
+    `Content-Type: text/html; charset="UTF-8"`,
+    `Content-Transfer-Encoding: base64`,
+    ``,
+    Buffer.from(html).toString('base64'),
+    `--${boundary}--`,
+  ].join('\r\n');
 
-  const msg = {
-    to,
-    from: {
-      email: 'analytics@massivemarketing.co.uk',
-      name: 'Mercer Labs Analytics',
-    },
-    subject: `Mercer Labs — ${dayOfWeek} ${reportDate}`,
-    html,
-  };
+  const raw = Buffer.from(mime).toString('base64url');
 
-  console.log(`[email-sender] Sending digest to ${to.length} recipient(s)`);
-  await sgMail.send(msg);
-  console.log('[email-sender] Email sent successfully');
+  await gmail.users.messages.send({
+    userId: 'me',
+    requestBody: { raw },
+  });
+
+  console.log(`[email-sender] Email sent to ${to.length} recipient(s) via Gmail API`);
 }

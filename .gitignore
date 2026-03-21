@@ -10,3 +10,10 @@ dist/
 
 .DS_Store
 *.log
+
+# Generated data files (re-created by scripts/)
+config/daily_budgets_clean.csv
+config/event_dates.csv
+
+# Large data exports (not tracked)
+config/*.xlsx

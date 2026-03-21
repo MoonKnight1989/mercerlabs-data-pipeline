@@ -39,6 +39,16 @@ CREATE TABLE IF NOT EXISTS reference.unknown_channels (
   resolved_at TIMESTAMP
 );
 
+-- Email recipients for automated reporting
+-- group_name controls which reports a contact receives
+CREATE TABLE IF NOT EXISTS reference.email_recipients (
+  email STRING NOT NULL,
+  display_name STRING,
+  group_name STRING NOT NULL,                  -- e.g. 'board', 'ops', 'all'
+  is_active BOOL DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+);
+
 CREATE TABLE IF NOT EXISTS reference.events (
   event_id STRING NOT NULL,
   event_name STRING,
@@ -48,4 +58,24 @@ CREATE TABLE IF NOT EXISTS reference.events (
   is_active BOOL DEFAULT TRUE,
   notes STRING,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- Event dates: maps child event IDs to their start dates
+-- Synced daily from Vivenu Events API via vivenu-ingest function
+CREATE TABLE IF NOT EXISTS reference.event_dates (
+  event_id STRING NOT NULL,
+  event_name STRING,
+  event_date DATE,
+  event_start STRING,
+  event_end STRING,
+  parent_id STRING
+);
+
+-- Daily budgets: 2026 targets for tickets sold, redemptions, and net revenue
+-- Loaded from CSV via scripts/load-daily-budgets.py
+CREATE TABLE IF NOT EXISTS reference.daily_budgets (
+  budget_date DATE NOT NULL,
+  budgeted_tickets_sold INT64,
+  budgeted_redemptions INT64,
+  budgeted_net_revenue FLOAT64
 );

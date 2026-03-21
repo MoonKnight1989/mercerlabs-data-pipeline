@@ -37,12 +37,15 @@ export interface ChannelMetrics {
 
 export async function fetchDailyMetrics(): Promise<DailyMetrics> {
   // Run all queries in parallel
-  const [yesterdayRows, prevWeekRows, eventRows, channelRows] = await Promise.all([
-    queryYesterday(),
-    querySameDayLastWeek(),
-    queryEventBreakdown(),
-    queryChannelBreakdown(),
-  ]);
+  const [yesterdayRows, prevWeekRows, eventRows, channelRows, checkins, prevCheckins] =
+    await Promise.all([
+      queryYesterday(),
+      querySameDayLastWeek(),
+      queryEventBreakdown(),
+      queryChannelBreakdown(),
+      queryCheckins(-1),
+      queryCheckins(-8),
+    ]);
 
   const yesterday = yesterdayRows[0];
   const prev = prevWeekRows[0] ?? null;
@@ -69,13 +72,13 @@ export async function fetchDailyMetrics(): Promise<DailyMetrics> {
     reportDate,
     dayOfWeek,
     ticketsSold: yesterday?.tickets_sold ?? 0,
-    redemptions: yesterday?.redemptions ?? 0,
+    redemptions: checkins?.total_checkins ?? 0,
     grossRevenue: yesterday?.gross_revenue ?? 0,
     netRevenue: yesterday?.net_revenue ?? 0,
     orders: yesterday?.orders ?? 0,
     compTickets: yesterday?.comp_tickets ?? 0,
     prevTicketsSold: prev?.tickets_sold ?? null,
-    prevRedemptions: prev?.redemptions ?? null,
+    prevRedemptions: prevCheckins?.total_checkins ?? null,
     prevGrossRevenue: prev?.gross_revenue ?? null,
     prevNetRevenue: prev?.net_revenue ?? null,
     eventBreakdown: eventRows,
@@ -124,6 +127,24 @@ async function querySameDayLastWeek(): Promise<AggRow[]> {
     `,
   });
   return rows as AggRow[];
+}
+
+interface CheckinRow {
+  total_checkins: number;
+  paid_checkins: number;
+  comp_checkins: number;
+}
+
+async function queryCheckins(dayOffset: number): Promise<CheckinRow | null> {
+  const [rows] = await bq.query({
+    query: `
+      SELECT total_checkins, paid_checkins, comp_checkins
+      FROM \`${PROJECT_ID}.mercer_analytics.daily_capacity_summary\`
+      WHERE checkin_date = CURRENT_DATE('America/New_York') + @offset
+    `,
+    params: { offset: dayOffset },
+  });
+  return (rows as CheckinRow[])[0] ?? null;
 }
 
 async function queryEventBreakdown(): Promise<EventMetrics[]> {

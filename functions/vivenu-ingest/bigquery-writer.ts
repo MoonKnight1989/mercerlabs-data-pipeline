@@ -257,6 +257,71 @@ export async function findNewRootEvents(): Promise<string[]> {
 }
 
 /**
+ * Sync all events into reference.event_dates.
+ * MERGE ensures new events are added and existing ones updated.
+ * This gives us event_id → event_date mapping for true redemption rates.
+ */
+export async function syncEventDates(events: VivenuEvent[]): Promise<MergeResult> {
+  if (events.length === 0) return { inserted: 0, updated: 0 };
+
+  const bq = new BigQuery({ projectId: PROJECT_ID });
+
+  const rows = events.map((ev) => ({
+    event_id: ev._id,
+    event_name: ev.name,
+    event_date: ev.start ? ev.start.split('T')[0] : null,
+    event_start: ev.start ?? null,
+    event_end: ev.end ?? null,
+    parent_id: null,
+  }));
+
+  // Use MERGE via temp table to handle inserts and updates
+  const tempTable = `_temp_event_dates_${Date.now()}`;
+  const tempFqn = `\`${PROJECT_ID}.reference.${tempTable}\``;
+  const targetFqn = `\`${PROJECT_ID}.reference.event_dates\``;
+
+  // Create temp table matching event_dates schema
+  const [createJob] = await bq.createQueryJob({
+    query: `CREATE TABLE ${tempFqn} AS SELECT * FROM ${targetFqn} WHERE FALSE`,
+  });
+  await createJob.getQueryResults();
+
+  // Insert in batches
+  const tempRef = bq.dataset('reference').table(tempTable);
+  for (let i = 0; i < rows.length; i += 500) {
+    await tempRef.insert(rows.slice(i, i + 500), { createInsertId: false });
+  }
+
+  // MERGE
+  const [mergeJob] = await bq.createQueryJob({
+    query: `
+      MERGE ${targetFqn} AS target
+      USING ${tempFqn} AS source
+      ON target.event_id = source.event_id
+      WHEN MATCHED THEN
+        UPDATE SET
+          event_name = source.event_name,
+          event_date = source.event_date,
+          event_start = source.event_start,
+          event_end = source.event_end
+      WHEN NOT MATCHED THEN
+        INSERT ROW
+    `,
+  });
+  await mergeJob.getQueryResults();
+
+  await tempRef.delete({ ignoreNotFound: true });
+
+  const metadata = await mergeJob.getMetadata();
+  const dmlStats = metadata[0]?.statistics?.query?.dmlStats;
+  const inserted = Number(dmlStats?.insertedRowCount ?? 0);
+  const updated = Number(dmlStats?.updatedRowCount ?? 0);
+
+  console.log(`[bigquery-writer] event_dates MERGE: ${inserted} inserted, ${updated} updated`);
+  return { inserted, updated };
+}
+
+/**
  * Insert newly discovered root events into reference.events.
  * Called with events fetched from the Vivenu API by ID.
  */

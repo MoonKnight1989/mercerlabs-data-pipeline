@@ -1,5 +1,3 @@
-// Types needed by daily-email-digest (copied from shared/types.ts)
-
 /** Row shape for mercer_analytics.daily_revenue_summary */
 export interface DailyRevenueSummary {
   report_date: string;
@@ -39,52 +37,52 @@ export interface DailyCapacitySummary {
   updated_at: string;
 }
 
-/** Row shape for reference.unknown_channels */
-export interface UnknownChannel {
-  sales_channel_id: string;
-  first_seen_at: string;
-  sample_ticket_id: string | null;
-  sample_price: number | null;
-  ticket_count: number;
-  resolved: boolean;
-  resolved_at: string | null;
-}
-
-/** Channel breakdown for email digest */
-export interface ChannelSummary {
-  name: string;
-  type: string;
-  tickets: number;
-  gross_revenue: number;
+/** Event-level breakdown */
+export interface EventSummary {
+  event_name: string;
+  tickets_sold: number;
   net_revenue: number;
-  commission_rate: number;
+  pct_of_total: number;
 }
 
-/** Structured data payload sent to Claude API for narrative generation */
+/** Channel-level breakdown */
+export interface ChannelSummary {
+  channel: string;
+  tickets_sold: number;
+  net_revenue: number;
+  pct_of_total: number;
+}
+
+/** Recipient from reference.email_recipients */
+export interface EmailRecipient {
+  email: string;
+  display_name: string | null;
+}
+
+/** Full digest payload for email template rendering */
 export interface EmailDigestPayload {
   report_date: string;
   day_of_week: string;
-  yesterday: {
-    net_revenue: number;
-    gross_revenue: number;
-    commission_total: number;
-    tickets_sold: number;
-    orders: number;
-    total_checkins: number;
-    paid_checkins: number;
-    comp_checkins: number;
-    channels: ChannelSummary[];
-  };
-  same_day_last_week: {
-    net_revenue: number;
-    tickets_sold: number;
-  } | null;
-  trailing_7_day_avg: {
-    net_revenue: number;
-    tickets_sold: number;
-    redemptions: number;
-  } | null;
-  alerts: {
-    unknown_channels: UnknownChannel[];
-  };
+  // Headline totals
+  total_tickets_sold: number;
+  net_revenue: number;
+  retail_net_revenue: number;
+  total_net_revenue: number;
+  gross_revenue: number;
+  total_redemptions: number;
+  orders: number;
+  comp_tickets: number;
+  // WoW comparisons
+  prev_tickets_sold: number | null;
+  prev_net_revenue: number | null;
+  prev_gross_revenue: number | null;
+  prev_redemptions: number | null;
+  // Breakdowns
+  events: EventSummary[];
+  channels: ChannelSummary[];
+  // Additional categories
+  gift_card_tickets: number;
+  gift_card_revenue: number;
+  group_tickets: number;
+  group_revenue: number;
 }

@@ -139,7 +139,15 @@ USING (
     END AS refund_date,
 
     -- Event name from reference.events (show/experience name)
-    ev.event_name
+    ev.event_name,
+
+    -- Event date: the specific date this ticket is for
+    -- For dated child events: use event start date from reference.event_dates
+    -- For undated events (e.g. Admission Pass): fall back to checkin_date
+    COALESCE(
+      edt.event_date,
+      DATE(TIMESTAMP(sc.first_checkin_at), 'America/New_York')
+    ) AS event_date
 
   FROM (
     SELECT * FROM (
@@ -170,6 +178,10 @@ USING (
   LEFT JOIN reference.events ev
     ON t.root_event_id = ev.event_id
 
+  -- Join event_dates for specific event date (child event start date)
+  LEFT JOIN reference.event_dates edt
+    ON t.event_id = edt.event_id
+
   -- Join scans: pre-aggregate to first checkin per ticket
   LEFT JOIN (
     SELECT
@@ -198,6 +210,7 @@ WHEN MATCHED THEN
     event_id = source.event_id,
     root_event_id = source.root_event_id,
     event_name = source.event_name,
+    event_date = source.event_date,
     ticket_type_id = source.ticket_type_id,
     ticket_name = source.ticket_name,
     ticket_category = source.ticket_category,

@@ -124,7 +124,7 @@ export async function fetchEvents(apiKey: string): Promise<VivenuEvent[]> {
 
   const headers = { Authorization: `Bearer ${apiKey}` };
 
-  console.log('[vivenu-client] Fetching events for ticket type base prices');
+  console.log('[vivenu-client] Fetching all events');
 
   while (hasMore) {
     const params = new URLSearchParams({
@@ -156,36 +156,40 @@ export async function fetchEventById(apiKey: string, eventId: string): Promise<V
 }
 
 /**
- * Fetch recent scans from Portier API (newest first).
- * The Portier API has no date filter, so we fetch pages from the front
- * and stop after `maxPages` pages. Default 10 pages = 10,000 scans
- * which covers ~2-3 days of typical volume.
+ * Fetch scans from Portier API for a date range using the time filter.
+ * Defaults to the last 3 days to ensure complete coverage.
  * The MERGE in BigQuery handles deduplication.
  */
 export async function fetchRecentScans(
   apiKey: string,
-  maxPages = 10
+  daysBack = 3
 ): Promise<VivenuScan[]> {
   const allScans: VivenuScan[] = [];
   const headers = { Authorization: `Bearer ${apiKey}` };
   const scanPageSize = 1000;
 
-  console.log(`[vivenu-client] Fetching recent scans (up to ${maxPages} pages)`);
+  // Build date range: from daysBack days ago at midnight UTC to now
+  const from = new Date();
+  from.setDate(from.getDate() - daysBack);
+  from.setHours(0, 0, 0, 0);
+  const fromIso = from.toISOString();
 
-  for (let page = 0; page < maxPages; page++) {
+  console.log(`[vivenu-client] Fetching scans from ${fromIso} (${daysBack} days back)`);
+
+  let page = 0;
+  while (true) {
     const skip = page * scanPageSize;
-    const params = new URLSearchParams({
-      top: String(scanPageSize),
-      skip: String(skip),
-    });
+    // Portier API uses bracket notation for filters: time[$gte]=ISO_STRING
+    const qs = `top=${scanPageSize}&skip=${skip}&time[$gte]=${encodeURIComponent(fromIso)}`;
 
-    const response = await fetchWithRetry(`${SCANS_BASE_URL}?${params.toString()}`, headers);
+    const response = await fetchWithRetry(`${SCANS_BASE_URL}?${qs}`, headers);
     const data = (await response.json()) as VivenuScansResponse;
 
     allScans.push(...data.docs);
 
     if (data.docs.length < scanPageSize) break;
 
+    page++;
     console.log(`[vivenu-client] Scans: ${allScans.length}/${data.total}`);
   }
 

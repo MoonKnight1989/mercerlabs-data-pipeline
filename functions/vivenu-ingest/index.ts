@@ -2,8 +2,8 @@ import * as ff from '@google-cloud/functions-framework';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import { randomUUID } from 'crypto';
 import type { IngestionResult } from './types';
-import { fetchTickets, fetchTransactions, fetchRecentScans, fetchEventById } from './vivenu-client';
-import { mergeTickets, mergeTransactions, mergeScans, findNewRootEvents, insertNewEvents } from './bigquery-writer';
+import { fetchTickets, fetchTransactions, fetchRecentScans, fetchEventById, fetchEvents } from './vivenu-client';
+import { mergeTickets, mergeTransactions, mergeScans, findNewRootEvents, insertNewEvents, syncEventDates } from './bigquery-writer';
 import { checkForUnknownChannels } from './channel-checker';
 
 const GCP_PROJECT = 'mercer-labs-488707';
@@ -77,6 +77,17 @@ async function runCatchup(): Promise<IngestionResult> {
     errors.push(`Event sync failed: ${msg}`);
   }
 
+  // Sync all event dates into reference.event_dates (for true redemption rate)
+  let eventDatesResult = { inserted: 0, updated: 0 };
+  try {
+    const allEvents = await fetchEvents(apiKey);
+    eventDatesResult = await syncEventDates(allEvents);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[vivenu-ingest] Event dates sync failed (non-fatal): ${msg}`);
+    errors.push(`Event dates sync failed: ${msg}`);
+  }
+
   // Check for unknown sales channels
   const newUnknownChannels = await checkForUnknownChannels();
   if (newUnknownChannels.length > 0) {
@@ -107,6 +118,7 @@ async function runCatchup(): Promise<IngestionResult> {
     `[vivenu-ingest] Complete: tickets(+${result.tickets_inserted}/~${result.tickets_updated}), ` +
       `transactions(+${result.transactions_inserted}/~${result.transactions_updated}), ` +
       `scans(+${result.scans_inserted}/~${result.scans_updated}), ` +
+      `event_dates(+${eventDatesResult.inserted}/~${eventDatesResult.updated}), ` +
       `${result.new_unknown_channels.length} new channels, ${result.duration_ms}ms`
   );
 
