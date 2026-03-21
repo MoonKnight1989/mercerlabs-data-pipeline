@@ -1,7 +1,31 @@
 import * as ff from '@google-cloud/functions-framework';
 import { randomUUID } from 'crypto';
-import { fetchSessions, fetchPurchases } from './ga4-client';
-import { writeSessions, writePurchases, deleteDateRange } from './bigquery-writer';
+import {
+  fetchSessions,
+  fetchPurchases,
+  fetchDailyOverview,
+  fetchPages,
+  fetchTechnology,
+  fetchUserAcquisition,
+} from './ga4-client';
+import {
+  writeSessions,
+  writePurchases,
+  writeDailyOverview,
+  writePages,
+  writeTechnology,
+  writeUserAcquisition,
+  deleteDateRange,
+} from './bigquery-writer';
+
+const ALL_TABLES = [
+  'ga4_sessions',
+  'ga4_purchases',
+  'ga4_daily_overview',
+  'ga4_pages',
+  'ga4_technology',
+  'ga4_user_acquisition',
+];
 
 function daysAgo(n: number): Date {
   const d = new Date();
@@ -48,16 +72,21 @@ ff.http('ga4Ingest', async (req, res) => {
 
   try {
     // Delete existing data for this range (idempotent re-runs)
-    // Skip delete for initial backfill or when streaming buffer conflicts
     if (!skipDelete) {
-      await deleteDateRange('ga4_sessions', startStr, endStr);
-      await deleteDateRange('ga4_purchases', startStr, endStr);
+      await Promise.all(
+        ALL_TABLES.map((t) => deleteDateRange(t, startStr, endStr))
+      );
     }
 
-    // Fetch from GA4 Data API in chunks of 30 days (API can handle large ranges but
-    // chunking avoids response size limits and gives progress logging)
-    let totalSessions = 0;
-    let totalPurchases = 0;
+    // Fetch and write in chunks of 30 days
+    const totals = {
+      sessions: 0,
+      purchases: 0,
+      daily_overview: 0,
+      pages: 0,
+      technology: 0,
+      user_acquisition: 0,
+    };
 
     let chunkStart = new Date(startDate);
     while (chunkStart <= endDate) {
@@ -65,17 +94,32 @@ ff.http('ga4Ingest', async (req, res) => {
       chunkEnd.setDate(chunkEnd.getDate() + 29);
       if (chunkEnd > endDate) chunkEnd.setTime(endDate.getTime());
 
-      const [sessions, purchases] = await Promise.all([
+      // Fetch all report types in parallel
+      const [sessions, purchases, overview, pages, tech, acquisition] = await Promise.all([
         fetchSessions(chunkStart, chunkEnd),
         fetchPurchases(chunkStart, chunkEnd),
+        fetchDailyOverview(chunkStart, chunkEnd),
+        fetchPages(chunkStart, chunkEnd),
+        fetchTechnology(chunkStart, chunkEnd),
+        fetchUserAcquisition(chunkStart, chunkEnd),
       ]);
 
-      if (sessions.length > 0) {
-        totalSessions += await writeSessions(sessions, batchId);
-      }
-      if (purchases.length > 0) {
-        totalPurchases += await writePurchases(purchases, batchId);
-      }
+      // Write all in parallel
+      const [s, p, o, pg, t, a] = await Promise.all([
+        writeSessions(sessions, batchId),
+        writePurchases(purchases, batchId),
+        writeDailyOverview(overview, batchId),
+        writePages(pages, batchId),
+        writeTechnology(tech, batchId),
+        writeUserAcquisition(acquisition, batchId),
+      ]);
+
+      totals.sessions += s;
+      totals.purchases += p;
+      totals.daily_overview += o;
+      totals.pages += pg;
+      totals.technology += t;
+      totals.user_acquisition += a;
 
       chunkStart.setDate(chunkStart.getDate() + 30);
     }
@@ -84,8 +128,7 @@ ff.http('ga4Ingest', async (req, res) => {
       status: 'ok',
       batch_id: batchId,
       date_range: { start: startStr, end: endStr },
-      sessions_rows: totalSessions,
-      purchase_rows: totalPurchases,
+      rows: totals,
     };
 
     console.log(`[ga4-ingest] Complete: ${JSON.stringify(result)}`);
