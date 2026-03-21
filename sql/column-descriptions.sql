@@ -144,3 +144,29 @@ ALTER COLUMN tickets_for_event_date SET OPTIONS(description='Total tickets (paid
 ALTER COLUMN paid_tickets_for_event_date SET OPTIONS(description='Paid tickets sold for events scheduled on this date'),
 ALTER COLUMN redeemed_for_event_date SET OPTIONS(description='Paid tickets for events on this date that were actually scanned'),
 ALTER COLUMN redemption_rate SET OPTIONS(description='True redemption rate: redeemed / paid tickets for events on this date');
+
+-- ============================================================
+-- 6. mercer_analytics.campaign_attribution
+--    Per-campaign metrics: GA4 purchases joined to Vivenu
+--    tickets via checkout_id for full attribution.
+--    Only captures web-attributed purchases (not OTA/partner).
+-- ============================================================
+ALTER TABLE mercer_analytics.campaign_attribution
+ALTER COLUMN purchase_date SET OPTIONS(description='Date the purchase was made (from GA4 purchase event)'),
+ALTER COLUMN source SET OPTIONS(description='Traffic source from GA4 session attribution (e.g. google, facebook, direct)'),
+ALTER COLUMN medium SET OPTIONS(description='Traffic medium from GA4 (e.g. cpc, organic, referral, social, none)'),
+ALTER COLUMN campaign SET OPTIONS(description='Campaign name from UTM parameters (e.g. MER_Search_Branded_Institutional, MER_PMax)'),
+ALTER COLUMN default_channel_group SET OPTIONS(description='GA4 default channel grouping (e.g. Paid Search, Organic Search, Direct, Organic Social)'),
+ALTER COLUMN orders SET OPTIONS(description='Distinct web orders (GA4 transaction_id = Vivenu checkout_id)'),
+ALTER COLUMN tickets_sold SET OPTIONS(description='Total tickets in attributed orders'),
+ALTER COLUMN tickets_redeemed SET OPTIONS(description='Tickets from attributed orders that were scanned at the gate'),
+ALTER COLUMN redemption_rate SET OPTIONS(description='Fraction of attributed tickets that were redeemed (scanned). Shows campaign quality — do these buyers actually show up?'),
+ALTER COLUMN gross_revenue SET OPTIONS(description='Total retail value of tickets in attributed orders'),
+ALTER COLUMN net_revenue SET OPTIONS(description='Net revenue after commission for attributed tickets. For web sales this equals gross (no partner commission on direct web)'),
+ALTER COLUMN gross_revenue_redeemed SET OPTIONS(description='Gross revenue for attributed tickets that were actually redeemed'),
+ALTER COLUMN net_revenue_redeemed SET OPTIONS(description='Net revenue for attributed tickets that were actually redeemed'),
+ALTER COLUMN avg_ticket_price SET OPTIONS(description='Average gross price per ticket in attributed orders'),
+ALTER COLUMN comp_tickets SET OPTIONS(description='Complimentary (free) tickets in attributed orders'),
+ALTER COLUMN avg_days_to_visit SET OPTIONS(description='Average days between purchase and first gate scan for redeemed tickets. Shows how far in advance each campaign drives purchases'),
+ALTER COLUMN no_show_rate SET OPTIONS(description='Fraction of tickets purchased 7+ days ago that were never redeemed. NULL for recent dates where the 7-day window has not elapsed'),
+ALTER COLUMN updated_at SET OPTIONS(description='When this table was last rebuilt by the transform');
